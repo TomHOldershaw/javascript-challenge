@@ -1,12 +1,12 @@
 // Read JSON
-//d3.json("samples.json").then(function(data) {
-    let dropdowns = data[0].names;
-    let metaData = data[0].metadata;
-    let bellyData = data[0].samples;
-//})
+d3.json("./samples.json").then(function(data) {
+    let dropdowns = data.names;
+    let metaData = data.metadata;
+    let bellyData = data.samples;
+    
+    demographicData(metaData[0]);
 
 // Dropdown
-function dropdown() {
 let ddsel = d3.select("#selDataset");
 
 for (let i in dropdowns) {
@@ -15,17 +15,24 @@ for (let i in dropdowns) {
     .append("option")
     .text(sample)
     .property("value", i);
-}}
+};
 
-// Empty charts
+    let subjectData = bellyData[0];
+    //subjectData.sort((a,b) => a[2] - b[2]).reverse();
+    let otu_ids = subjectData.otu_ids;
+    let sample_values = subjectData.sample_values;
+    let otu_labels = subjectData.otu_labels;
+    console.log(sample_values);
+
+
+    // Empty charts
 let ebarTrace = {
-    x: [],
-    y: [],
+    y: otu_ids,
+    x: sample_values,
     type: "bar",
-    name: "",
     orientation: "h",
-    text: []
-}
+    text: otu_labels
+};
 
 let ebarData = [ebarTrace];
 
@@ -33,36 +40,37 @@ let barLayout = {
     title: "Occurence of belly button bacteria",
   };
 
-  Plotly.newPlot("bar", ebarData, barLayout)
+  Plotly.newPlot("bar", ebarData, barLayout);
 
 let ebubbleTrace = {
-    x: [],
-    y: [],
+    x: otu_ids,
+    y: sample_values,
     mode: 'markers',
-    color: [],
-    size: [],
-    text: []
-}
+    marker: {
+        color: otu_ids,
+        size: sample_values.map(size => size/2)
+    },
+    text: otu_labels
+};
 
 let bubbleLayout = {
     title: "Prevalence of bacteria"
-}
+};
 
- Plotly.newPlot("bubble", [ebubbleTrace], bubbleLayout)
+ Plotly.newPlot("bubble", [ebubbleTrace], bubbleLayout);
 
-function Chart(s) {
+});
+
+function Chart(subjectData) {
+    let otu_ids = subjectData.otu_ids;
+    let sample_values = subjectData.sample_values;
+    let otu_labels = subjectData.otu_labels;
+    console.log(subjectData);
+    console.log(otu_ids);
 
 // Bar chart
- let subjectData = bellyData[s];
- let otu_ids = subjectData.otu_ids;
- let sample_values = subjectData.sample_values;
- let otu_labels = subjectData.otu_labels;
- console.log(subjectData);
- console.log(otu_ids);
-
-  Plotly.restyle("bar", "x", [otu_ids]);
-  Plotly.restyle("bar", "y", [sample_values]);
-  Plotly.restyle("bar", "name", dropdowns[s]);
+  Plotly.restyle("bar", "y", [otu_ids]);
+  Plotly.restyle("bar", "x", [sample_values]);
   Plotly.restyle("bar", "text", [otu_labels]);
 
 // Bubble chart
@@ -74,18 +82,13 @@ function Chart(s) {
 }
 
 // Demographic data
-function demographicData(s) {
- let dembox = d3.select("#sample-metadata");
- let subjectMeta = metaData[s];
- let demtext = "";
+function demographicData(subjectMeta) {
+ let dembox = d3.select("#metadata-list");
+ dembox.text("");
 
 for (let [key, value] of Object.entries(subjectMeta)) {
-    dembox
-      demtext = (demtext + key + ": " + value + "\<br\>");
+      dembox.append("text").text(`${key}: ${value}`).append("br");
 }
-
-dembox.text(demtext);
-
 }
 
 // Gauge chart
@@ -94,12 +97,10 @@ function gaugeChart(subject) {
 }
 
 // Change data
-function optionChanged(subject) {
-    Chart(subject);
-    demographicData(subject);
-    console.log("Index: " + subject);
-    console.log("Subject: " + dropdowns[subject]);
-}
-
-dropdown();
-optionChanged(0);
+function optionChanged(s) {
+    d3.json("./samples.json").then(function(data) {
+        let metaData = data.metadata;
+        let bellyData = data.samples;
+        Chart(bellyData[s]);
+        demographicData(metaData[s]);
+})};
