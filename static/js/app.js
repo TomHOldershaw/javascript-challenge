@@ -18,26 +18,28 @@ for (let i in dropdowns) {
 };
 
     let subjectData = bellyData[0];
-    //subjectData.sort((a,b) => a[2] - b[2]).reverse();
     let otu_ids = subjectData.otu_ids;
     let sample_values = subjectData.sample_values;
     let otu_labels = subjectData.otu_labels;
-    console.log(sample_values);
-
+    
+    let otu_ids_10 = otu_ids.slice(0, 10);
+    let sample_values_10 = sample_values.slice(0, 10);
+    let otu_labels_10 = otu_labels.slice(0,10);
+    let otu_y_10 = otu_ids_10.map(otu => `OTU ${otu}`);
 
     // Empty charts
 let ebarTrace = {
-    y: otu_ids,
-    x: sample_values,
+    y: otu_y_10,
+    x: sample_values_10,
     type: "bar",
     orientation: "h",
-    text: otu_labels
+    text: otu_labels_10
 };
 
 let ebarData = [ebarTrace];
 
 let barLayout = {
-    title: "Occurence of belly button bacteria",
+    title: "Top 10 belly button bacteria",
   };
 
   Plotly.newPlot("bar", ebarData, barLayout);
@@ -65,13 +67,16 @@ function Chart(subjectData) {
     let otu_ids = subjectData.otu_ids;
     let sample_values = subjectData.sample_values;
     let otu_labels = subjectData.otu_labels;
-    console.log(subjectData);
-    console.log(otu_ids);
+
+    let otu_ids_10 = otu_ids.slice(0, 10);
+    let sample_values_10 = sample_values.slice(0, 10);
+    let otu_labels_10 = otu_labels.slice(0,10);
+    let otu_y_10 = otu_ids_10.map(otu => `OTU ${otu}`);
 
 // Bar chart
-  Plotly.restyle("bar", "y", [otu_ids]);
-  Plotly.restyle("bar", "x", [sample_values]);
-  Plotly.restyle("bar", "text", [otu_labels]);
+  Plotly.restyle("bar", "y", [otu_y_10]);
+  Plotly.restyle("bar", "x", [sample_values_10]);
+  Plotly.restyle("bar", "text", [otu_labels_10]);
 
 // Bubble chart
  Plotly.restyle("bubble", "x", [otu_ids]);
@@ -102,5 +107,5 @@ function optionChanged(s) {
         let metaData = data.metadata;
         let bellyData = data.samples;
         Chart(bellyData[s]);
-        demographicData(metaData[s]);
-})};
+        demographicData(metaData[s])
+    })};
